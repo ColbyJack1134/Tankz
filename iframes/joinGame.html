@@ -1,0 +1,32 @@
+<html>
+  <head>
+  </head>
+  
+  <body>
+    
+    <h1>TANKZ</h1>
+    <button id="newGame" onclick="startGame();">New Lobby</button>
+    <br>
+    <button id="joinGame" onclick="joinGame();">Join Lobby: </button><input type="text" id="joinGameText">
+
+    <script>    
+      
+      /* Functions */
+      function startGame(){
+      	const payload = {
+      		"method": "create",
+      		"clientId": parent.clientId
+      	}
+      	parent.ws.send(JSON.stringify(payload));
+      }
+      function joinGame(){
+      	parent.gameId = document.getElementById("joinGameText").value;
+      	redirect("/tankz/iframes/lobby.html");
+      }
+      function redirect(href){
+      	window.location.href = href;
+      }
+      
+    </script>
+  </body>
+</html>

@@ -1,0 +1,116 @@
+<html>
+	<head>
+    	<style>
+        	body{
+            	overflow:hidden;
+            }
+            #screenContainer{
+            	position:absolute;
+            	border: 5px solid black;
+                left:50%;
+                top:50%;
+                width:1800px;
+                height:800px;
+                transform:translate(-50%, -50%);
+                overflow:hidden;
+            }
+          	#lobbyCode{
+          		position: absolute;
+          		left: 50%;
+          		bottom: 2%;
+          		transform: translate(-50%);
+          		font-size: 24px;
+          	}
+          	#scoreboard{
+          		position: absolute;
+          		left: 50%;
+          		top: 2%;
+          		transform: translate(-50%);
+          		font-size: 24px;
+          	}
+          	.scoreElem{
+          		margin-left: 5px;
+          		margin-right: 5px;
+          		font-size: 25px;
+          		font-weight: bold;
+          	}
+        </style>
+
+    </head>
+    <body>
+    	<div id="screenContainer">
+        	<canvas id="canvas" width="1800px" height="800px"></canvas>
+        </div>
+      	<div id="lobbyCode"></div>
+      	<div id="scoreboard"></div>
+
+      
+      <script src="https://aydencolby.com/projects/tankz/javascript/tankzRenderer.js"></script>
+      <script>
+      	var gameState = null;
+        
+        document.getElementById("lobbyCode").textContent = parent.gameId;
+        
+        function updateGameState(gameInfo){
+        	draw(gameInfo);
+        }
+        
+        /* HANDLE INPUT */
+      	var up=false, down=false, left=false, right=false;
+      	document.addEventListener('keydown',keypress)
+        function keypress(e){
+          let payload = {
+              "method": "input",
+              "clientId": parent.clientId,
+              "gameId": parent.gameId,
+        	  "mode": "press"
+          }
+          if (e.keyCode === 38 || e.keyCode === 87){
+            payload.key = "up";
+          }
+          else if (e.keyCode === 39 || e.keyCode === 68){
+            payload.key = "right";
+          }
+          else if (e.keyCode === 40 || e.keyCode === 83){
+            payload.key = "down";
+          }
+          else if (e.keyCode === 37 || e.keyCode === 65){
+            payload.key = "left";
+          }
+          else if (e.keyCode == 32){		//space
+        	payload.key = "space";
+          }
+          else{
+        	return;
+          }
+          parent.ws.send(JSON.stringify(payload));
+        }
+      	document.addEventListener('keyup',keyrelease)
+        function keyrelease(e){
+          let payload = {
+              "method": "input",
+              "clientId": parent.clientId,
+              "gameId": parent.gameId,
+        	  "mode": "release"
+          }
+          if (e.keyCode === 38 || e.keyCode === 87){
+            payload.key = "up";
+          }
+          else if (e.keyCode === 39 || e.keyCode === 68){
+            payload.key = "right";
+          }
+          else if (e.keyCode === 40 || e.keyCode === 83){
+            payload.key = "down";
+          }
+          else if (e.keyCode === 37 || e.keyCode === 65){
+            payload.key = "left";
+          }
+          else{
+			return;
+          }
+          parent.ws.send(JSON.stringify(payload));
+        }
+      </script>
+    </body>
+
+</html>

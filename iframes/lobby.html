@@ -1,0 +1,79 @@
+<html>
+	<head>
+      <style>
+        .playerContainer{
+        	display: inline-block;
+        }
+        .playerName{
+        	text-align: center;
+        }
+      </style>
+  	</head>
+  
+  	<body>
+      <h1 id="headerThing">LOBBY </h1>
+      <pre id="players"></pre>
+      <br>
+      <button onclick="startGame()" style="display: none" id="startButton">Start Game</button>
+      
+      <script> 
+        /* Startup */
+        if(parent.clientId === null || parent.gameId === null){
+        	window.location.replace("/tankz/index.html");
+        }
+        document.getElementById("headerThing").textContent += parent.gameId;
+        joinGame();		
+        
+        /* Functions */
+        function joinGame(){
+          const payload = {
+              "method": "join",
+              "clientId": parent.clientId,
+              "gameId": parent.gameId,
+        	  "name": parent.playerInfo.name
+          }
+          parent.ws.send(JSON.stringify(payload));
+      	}
+        function redirect(href){
+      		window.location.href = href;
+      	}
+        function clearPlayers(){
+        	while(document.getElementById("players").lastChild){
+        		document.getElementById("players").removeChild(document.getElementById("players").lastChild);
+        	}
+        }
+        function addPlayer(name){
+        	let container = document.createElement("div");
+        	container.className = "playerContainer";
+        
+        	let player = document.createElement("img");
+        	let currColor = {"0": "red", "1": "green", "2": "blue"}[document.getElementById("players").children.length];
+        	player.src = "https://aydencolby.com/projects/tankz/images/"+currColor+"tank.png";
+        
+        	if(currColor == parent.playerInfo.color){
+        		container.style.border = "solid 3px green";
+        	}
+        
+        	let nameElem = document.createElement("div");
+        	nameElem.textContent = name;
+        	nameElem.className = "playerName";
+   
+        	container.appendChild(player);
+        	container.appendChild(nameElem);
+        	document.getElementById("players").appendChild(container);
+        }
+        function showPlayButton(){
+        	document.getElementById("startButton").style.display = "initial";
+        }
+        function startGame(){
+        	const payload = {
+              "method": "start",
+              "clientId": parent.clientId,
+              "gameId": parent.gameId
+          	}
+          	parent.ws.send(JSON.stringify(payload));
+        }
+      </script>
+  	</body>
+</html>
+

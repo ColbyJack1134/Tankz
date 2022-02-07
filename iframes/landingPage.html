@@ -1,0 +1,23 @@
+<html>
+  <head>
+  </head>
+  
+  <body>
+    <div>TANKZ</div>
+    <div>Username: </div><input type="text" id="nameText">
+    <button onclick="startGame();">Enter</button>
+    
+    <script>
+      
+      function startGame(){
+      	if(document.getElementById("nameText").value == ""){
+      		parent.playerInfo.name = "Guest-"+Math.floor(Math.random()*100);
+      	}
+      	else{
+      		parent.playerInfo.name = document.getElementById("nameText").value;
+      	}
+      	window.location.href = "joinGame.html";
+      }
+    </script>
+  </body>
+</html>
