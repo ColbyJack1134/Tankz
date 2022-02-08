@@ -12,9 +12,10 @@ const server = require("./javascript/server.js");			//game and client classes
 
 /*HTTP STUFF*/
 app.get("/tankz", (req, res)=>res.sendFile(__dirname + "/index.html"));									//landing page
+app.get("/tankz/javascript/tankzRenderer.js", (req, res)=>res.sendFile(__dirname+"/javascript/tankzRenderer.js"));
 app.get("/tankz/images/*", (req, res)=>res.sendFile(__dirname + "/images/" + req.params[0]));			//img folder
 app.get("/tankz/iframes/*", (req, res)=>res.sendFile(__dirname + "/iframes/" + req.params[0]));			//iframes folder
-app.listen("8001", ()=>console.log("HTTP listeneing on port 8001"));										//http server on port 8001
+app.listen("80", ()=>console.log("HTTP listeneing on port 80"));										//http server on port 8001
 
 const clients = {};			//all the clients
 const games = {}; 			//all the games

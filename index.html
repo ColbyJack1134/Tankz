@@ -31,7 +31,7 @@
       var iframe = document.getElementById("gameFrame");
       
       /* Websocket stuff */
-      ws = new WebSocket("ws://aydencolby.com:8000");
+      ws = new WebSocket("ws://45.61.185.184:8000");
       ws.onmessage = message => {
       	//message.data is the string
       	const response = JSON.parse(message.data);
@@ -68,16 +68,14 @@
       	}
       	//update method
       	if(response.method === "update"){
-      		if(iframe.contentWindow.location.href !== "http://aydencolby.com:8001/tankz/iframes/game.html" && inGame == false){
-      			iframe.contentWindow.location.href = "http://aydencolby.com:8001/tankz/iframes/game.html";
+      		if(iframe.contentWindow.location.href !== "iframes/game.html" && inGame == false){
+      			iframe.contentWindow.location.href = "iframes/game.html";
       			inGame = true;
       		}
       		else if (typeof iframe.contentWindow.updateGameState !== "undefined"){
       			iframe.contentWindow.updateGameState(response.gameInfo);
       		}
-      	}
-      
-      	//console.log(response);
+      	} 
       }
     </script>
   </body>

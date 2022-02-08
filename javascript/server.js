@@ -56,8 +56,8 @@ class Game{
           for(let i = 0; i < this.gameState.tanks.length; i++){
              let color = {"0": "red", "1": "green", "2": "blue"}[i];
              this.gameState.tanks[i].setColor(color);
-             this.gameState.tanks[i].setName(player.playerinfo.name);
-           	 this.gameState.tanks[i].setSprite("https://aydencolby.com/projects/tankz/images/"+color+"tank.png");
+             this.gameState.tanks[i].setName(player.playerInfo.name);
+           	 this.gameState.tanks[i].setSprite("../images/"+color+"tank.png");
           }
         }
     }
@@ -89,7 +89,7 @@ class Game{
           	tanks.push(new tankz.Tank());
           	tanks[i].setColor(this.players[i].playerInfo.color);
           	tanks[i].setName(this.players[i].playerInfo.name);
-          	tanks[i].setSprite("https://aydencolby.com/projects/tankz/images/"+this.players[i].playerInfo.color+"tank.png");
+          	tanks[i].setSprite("../images/"+this.players[i].playerInfo.color+"tank.png");
           
           	this.players[i].setTank(tanks[i]);
         }
