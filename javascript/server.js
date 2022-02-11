@@ -52,11 +52,13 @@ class Game{
           this.gameState.tanks.push(new tankz.Tank());
           player.setTank(this.gameState.tanks[this.gameState.tanks.length - 1]); 
           
+          //set name
+          player.tank.setName(player.playerInfo.name);
+          
           //redo all the colors
           for(let i = 0; i < this.gameState.tanks.length; i++){
              let color = {"0": "red", "1": "green", "2": "blue"}[i];
              this.gameState.tanks[i].setColor(color);
-             this.gameState.tanks[i].setName(player.playerInfo.name);
            	 this.gameState.tanks[i].setSprite("../images/"+color+"tank.png");
           }
         }

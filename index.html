@@ -68,12 +68,16 @@
       	}
       	//update method
       	if(response.method === "update"){
-      		if(iframe.contentWindow.location.href !== "iframes/game.html" && inGame == false){
+      		if(response.newMap && iframe.contentWindow.location.href !== "iframes/game.html" && inGame == false){
       			iframe.contentWindow.location.href = "iframes/game.html";
+      			iframe.addEventListener("load", function() {
+                  iframe.contentWindow.updateGameState(response);
+                });
+      			
       			inGame = true;
       		}
       		else if (typeof iframe.contentWindow.updateGameState !== "undefined"){
-      			iframe.contentWindow.updateGameState(response.gameInfo);
+      			iframe.contentWindow.updateGameState(response);
       		}
       	} 
       }

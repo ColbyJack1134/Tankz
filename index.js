@@ -48,6 +48,17 @@ wsServer.on("request", request => {
                   }
                   logLobby(game.gameId, false, game.isActive);
               }
+              else if(game.isActive){
+                    //update the map bc a person left
+                  	let payload = {
+                        "method": "update",
+                        "newMap": true,
+                        "mapData": game.gameState.getMapInfo()
+                    }
+                    game.players.forEach(c=> {
+                      sendPayload(c, payload);
+                    })
+              }
               else{
                   //update gameinfo to players if not
                   let payload = {
@@ -75,7 +86,7 @@ wsServer.on("request", request => {
     if(result.method === "create"){
      	//user wants to create a new game
       	const clientId = result.clientId;
-      	const gameId = genRanHex(5);
+      	const gameId = genRanCode(5);
       
       	games[gameId] = new server.Game(gameId);
       	logLobby(gameId, true, false);
@@ -109,6 +120,16 @@ wsServer.on("request", request => {
         }
       	else if(game.isActive){
           	game.addPlayer(clients[clientId]);
+          	
+          	//update the map bc a new person joined
+          	let payload = {
+                "method": "update",
+                "newMap": true,
+                "mapData": game.gameState.getMapInfo()
+            }
+            game.players.forEach(c=> {
+              sendPayload(c, payload);
+            })
           	return;
         }
       	const color = {"0": "red", "1": "green", "2": "blue"}[game.players.length];		//skuffed plz fix
@@ -220,8 +241,19 @@ function updateActiveGames(){
     activeGames[gameId].gameState.update();
     
     payload = {
-      "method": "update",
-      "gameInfo": activeGames[gameId].gameState.getInfoToSend()
+        "method": "update",
+        "newMap": false
+    }
+    //update level data
+    if(activeGames[gameId].gameState.newMap){
+        payload["newMap"] = true;
+        payload["mapData"] = activeGames[gameId].gameState.getMapInfo();
+        
+        activeGames[gameId].gameState.readMapChange();
+    }
+    //update position data
+    else{
+        payload["gameData"] = activeGames[gameId].gameState.getGameInfo()
     }
     activeGames[gameId].players.forEach(c=> {
       sendPayload(c, payload);
@@ -260,7 +292,7 @@ function logLobby(gameId, created, isActive){
 }
 
 /* Game code stuff */
-const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+const genRanCode = size => [...Array(size)].map(() => Math.floor(Math.random() * 36).toString(36)).join('');
 
 /***guid stuff***/
 function S4() {

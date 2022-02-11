@@ -10,12 +10,17 @@ class GameState{
   
   	canvasW = 1800;
   	canvasH = 800;
+  	
+  	newMap = false;
   
   	constructor(){
       	this.gameState = "loading map";
     }
   	setTanks(tanks){
      	this.tanks = tanks; 
+    }
+    readMapChange(){
+        this.newMap = false;    
     }
   	update(){
       //MAIN GAME LOOP
@@ -45,6 +50,7 @@ class GameState{
       	this.aliveTanks = this.tanks.slice();
       
         this.gameState = "playing";
+        this.newMap = true;
       }
       else if(this.gameState == "playing" || this.gameState == "finishing round"){
         if(this.aliveTanks.length <= 1 && this.gameState != "finishing round"){
@@ -57,21 +63,21 @@ class GameState{
         for(let i = 0; i < this.tanks.length; i++){
           if(this.tanks[i].isAlive){
             if(this.tanks[i].keys.left == true && this.tanks[i].keys.right == false){
-          		this.tanks[i].changeRotation(-2, this)
+          		this.tanks[i].changeRotation(-2.5, this)
           	}
             else if(this.tanks[i].keys.left == false && this.tanks[i].keys.right == true){
-              	this.tanks[i].changeRotation(2, this)
+              	this.tanks[i].changeRotation(2.5, this)
             }
             
             let yTrig = Math.cos(degToRad(this.tanks[i].rotation))
             let xTrig = Math.sin(degToRad(this.tanks[i].rotation))
             if(this.tanks[i].keys.up == true && this.tanks[i].keys.down == false){
-              this.tanks[i].changePositionY(yTrig * -2, this);
-              this.tanks[i].changePositionX(xTrig * 2, this);
+              this.tanks[i].changePositionY(yTrig * -3, this);
+              this.tanks[i].changePositionX(xTrig * 3, this);
             }
             else if(this.tanks[i].keys.up == false && this.tanks[i].keys.down == true){
-              this.tanks[i].changePositionY(yTrig * 2, this);
-              this.tanks[i].changePositionX(xTrig * -2, this);
+              this.tanks[i].changePositionY(yTrig * 3, this);
+              this.tanks[i].changePositionX(xTrig * -3, this);
             }
             else if(this.tanks[i].keys.up == true && this.tanks[i].keys.down == true){
               this.tanks[i].changePositionY(yTrig * -1, this);
@@ -119,11 +125,11 @@ class GameState{
           this.aliveTanks.splice(index, 1); // 2nd parameter means remove one item only
         }
     }
-  	getInfoToSend(){
-    	//compile all the relevant game info to send to the clients
-      	let returner = {}
-      	
-      	//WALLS, need an array of 'walls' each containing a startX, startY, endX, endY
+  	getMapInfo(){
+    	//Get info that only needs to be updated when there is a new level
+    	let returner = {}
+    	
+    	//WALLS, need an array of 'walls' each containing a startX, startY, endX, endY
       	returner.walls = [];
       	for(let i = 0; i < this.wallArray.length; i++){
         	let wallData = {};
@@ -133,21 +139,17 @@ class GameState{
           	wallData.endY = this.wallArray[i].endY;
           	returner.walls.push(wallData);
         }
-      
-      	//TANKS, need tank position, rotation, sprite, color, score, name
-      	returner.tanks = [];
-      	for(let i = 0; i < this.aliveTanks.length; i++){
+        
+        //TANKS, need sprite, color, and name
+        returner.tanks = [];
+        for(let i = 0; i < this.tanks.length; i++){
         	let tankData = {};
-          	tankData.x = this.aliveTanks[i].x;
-          	tankData.y = this.aliveTanks[i].y;
-          	tankData.rotation = this.aliveTanks[i].rotation;
-          	tankData.sprite = this.aliveTanks[i].sprite;
-          	tankData.color = this.aliveTanks[i].color;
-          	tankData.points = this.aliveTanks[i].points;
-          	tankData.name = this.aliveTanks[i].name;
+          	tankData.sprite = this.tanks[i].sprite;
+          	tankData.color = this.tanks[i].color;
+          	tankData.name = this.tanks[i].name;
           	returner.tanks.push(tankData);
         }
-      	
+        
       	//SCORE, need score and color
       	returner.score = [];
       	for(let i = 0; i < this.tanks.length; i++){
@@ -156,7 +158,26 @@ class GameState{
           	scoreData.points = this.tanks[i].points;
           	returner.score.push(scoreData);
         }
-      
+        
+        return returner;
+    }
+    getGameInfo(){
+        //Get all the info that needs to be updated every tick
+      	let returner = {}
+
+      	//TANKS, need tank position, rotation
+      	returner.tanks = [];
+      	for(let i = 0; i < this.tanks.length; i++){
+        	let tankData = {};
+        	if(this.tanks[i].isAlive){
+              	tankData.x = this.tanks[i].x;
+              	tankData.y = this.tanks[i].y;
+              	tankData.rotation = this.tanks[i].rotation;
+              	tankData.id = i;
+              	returner.tanks.push(tankData);
+        	}
+        }
+      	
       	//BULLETS, need bullet position only for now
       	returner.bullets = [];
       	for(let i = 0; i < this.tanks.length; i++){
@@ -270,7 +291,7 @@ class Tank{
       var x = this.x + this.width/2 + (30 * Math.cos(degToRad(this.rotation - 90))); 		//center + r*rotation ; Dont ask why rotation is -90 it just works
       var y = this.y + this.height/2 + (30 * Math.sin(degToRad(this.rotation - 90)));
       let bullet = new Bullet(x, y, this.rotation - 90, this);
-      setTimeout(function(){bullet.destroy();}, 5000);
+      setTimeout(function(){bullet.destroy();}, 10000);
       this.bulletArr.push(bullet);
     }
   }
