@@ -29,8 +29,7 @@
           const payload = {
               "method": "join",
               "clientId": parent.clientId,
-              "gameId": parent.gameId,
-        	  "name": parent.playerInfo.name
+              "gameId": parent.gameId
           }
           parent.ws.send(JSON.stringify(payload));
       	}
@@ -42,15 +41,16 @@
         		document.getElementById("players").removeChild(document.getElementById("players").lastChild);
         	}
         }
-        function addPlayer(name){
+        function addPlayer(name, color, sprite){
+            
         	let container = document.createElement("div");
         	container.className = "playerContainer";
         
         	let player = document.createElement("img");
-        	let currColor = {"0": "red", "1": "green", "2": "blue"}[document.getElementById("players").children.length];
-        	player.src = "../images/"+currColor+"tank.png";
+        	player.src = sprite;
+        	player.style.filter = "hue-rotate("+color+"deg)";
         
-        	if(currColor == parent.playerInfo.color){
+        	if(color == parent.playerInfo.color){
         		container.style.border = "solid 3px green";
         	}
         

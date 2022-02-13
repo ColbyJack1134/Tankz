@@ -37,6 +37,47 @@
           		font-size: 25px;
           		font-weight: bold;
           	}
+          	#chatArea{
+          	    position: absolute;
+          	    bottom: 30px;
+          	    right: 1%;
+          	    width: 200px;
+          	    
+          	    background-color: rgba(200,200,200,0.69);
+          	    
+          	    opacity: 0%;
+          	}
+          	#chatArea div{
+          	    bottom: 0;
+          	    margin-top: 0;
+          	    margin-bottom: 0;
+          	    margin-left: 3px;
+          	    margin-right: 3px;
+          	    
+          	    white-space: pre;
+          	    height: 120px;
+          	    overflow-y: scroll;
+          	}
+          	#chatArea div::-webkit-scrollbar {
+                display: none;
+            }
+            #chatArea div span{
+                overflow: hidden;
+                white-space: pre-wrap;
+                overflow-wrap: anywhere;
+                
+                font-family: Arial, sans-serif;
+                font-size: 13px;
+            }
+          	#chatInput{
+          	    position: absolute;
+          	    bottom: 10px;
+          	    right: 1%;
+          	    
+          	    margin: none;
+          	    width: 200px;
+          	    height: 20px;
+          	}
         </style>
 
     </head>
@@ -46,6 +87,7 @@
         </div>
       	<div id="lobbyCode"></div>
       	<div id="scoreboard"></div>
+      	<div id="chatArea"><div id="messages"></div></div><input type="text" id="chatInput">
 
       
       <script src="../javascript/tankzRenderer.js"></script>
@@ -62,56 +104,118 @@
       	var up=false, down=false, left=false, right=false;
       	document.addEventListener('keydown',keypress)
         function keypress(e){
-          let payload = {
-              "method": "input",
-              "clientId": parent.clientId,
-              "gameId": parent.gameId,
-        	  "mode": "press"
+          if(document.activeElement.id !== "chatInput"){
+              let payload = {
+                  "method": "input",
+                  "clientId": parent.clientId,
+                  "gameId": parent.gameId,
+            	  "mode": "press"
+              }
+              if (e.keyCode === 38 || e.keyCode === 87){
+                payload.key = "up";
+              }
+              else if (e.keyCode === 39 || e.keyCode === 68){
+                payload.key = "right";
+              }
+              else if (e.keyCode === 40 || e.keyCode === 83){
+                payload.key = "down";
+              }
+              else if (e.keyCode === 37 || e.keyCode === 65){
+                payload.key = "left";
+              }
+              else if (e.keyCode == 32){		//space
+            	payload.key = "space";
+              }
+              else{
+            	return;
+              }
+              parent.ws.send(JSON.stringify(payload));
           }
-          if (e.keyCode === 38 || e.keyCode === 87){
-            payload.key = "up";
-          }
-          else if (e.keyCode === 39 || e.keyCode === 68){
-            payload.key = "right";
-          }
-          else if (e.keyCode === 40 || e.keyCode === 83){
-            payload.key = "down";
-          }
-          else if (e.keyCode === 37 || e.keyCode === 65){
-            payload.key = "left";
-          }
-          else if (e.keyCode == 32){		//space
-        	payload.key = "space";
-          }
-          else{
-        	return;
-          }
-          parent.ws.send(JSON.stringify(payload));
         }
       	document.addEventListener('keyup',keyrelease)
         function keyrelease(e){
-          let payload = {
-              "method": "input",
-              "clientId": parent.clientId,
-              "gameId": parent.gameId,
-        	  "mode": "release"
-          }
-          if (e.keyCode === 38 || e.keyCode === 87){
-            payload.key = "up";
-          }
-          else if (e.keyCode === 39 || e.keyCode === 68){
-            payload.key = "right";
-          }
-          else if (e.keyCode === 40 || e.keyCode === 83){
-            payload.key = "down";
-          }
-          else if (e.keyCode === 37 || e.keyCode === 65){
-            payload.key = "left";
-          }
-          else{
-			return;
-          }
-          parent.ws.send(JSON.stringify(payload));
+          if(document.activeElement.id !== "chatInput"){
+              let payload = {
+                  "method": "input",
+                  "clientId": parent.clientId,
+                  "gameId": parent.gameId,
+            	  "mode": "release"
+              }
+              if (e.keyCode === 38 || e.keyCode === 87){
+                payload.key = "up";
+              }
+              else if (e.keyCode === 39 || e.keyCode === 68){
+                payload.key = "right";
+              }
+              else if (e.keyCode === 40 || e.keyCode === 83){
+                payload.key = "down";
+              }
+              else if (e.keyCode === 37 || e.keyCode === 65){
+                payload.key = "left";
+              }
+              else if(e.key === "Enter"){
+                  document.getElementById("chatInput").focus();
+              }
+              else{
+    			return;
+              }
+              parent.ws.send(JSON.stringify(payload));
+            }
+        }
+        
+        /* CHAT STUFF */
+        var chatTimeout = null;
+        document.getElementById("chatInput").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                sendChat(document.getElementById("chatInput").value);
+            }
+        });
+        document.getElementById("chatInput").onfocus = function(){
+            showChat();
+        }
+        function updateChat(username, message, color){
+            let messageElem = document.getElementById("messages");
+            
+            let name = document.createElement("span");
+            name.style.color = "green";
+            name.style.filter = "hue-rotate("+color+"deg)";
+            name.textContent = "\n"+username;
+            
+            let messageE = document.createElement("span");
+            messageE.textContent += ": "+message;
+            
+            messageElem.appendChild(name);
+            messageElem.appendChild(messageE);
+            
+            messageElem.scrollTop = messageElem.scrollHeight;
+            
+            showChat();
+            
+        }
+        function sendChat(message){
+            setTimeout(function(){hideChat()}, 50);
+            if(message == ""){
+                return;
+            }
+            document.getElementById("chatInput").value = "";
+            const payload = {
+          		"method": "sendChat",
+          		"clientId": parent.clientId,
+          		"gameId": parent.gameId,
+          		"message": message
+          	}
+          	parent.ws.send(JSON.stringify(payload));
+        }
+        function showChat(){
+            document.getElementById("chatArea").style.transition = "opacity 0s linear";
+            document.getElementById("chatArea").style.opacity = "100%";
+        }
+        function hideChat(){
+            clearTimeout(chatTimeout);
+            chatTimeout = setTimeout(function(){document.getElementById("chatArea").style.transition = "opacity 1s linear";
+            document.getElementById("chatArea").style.opacity = "0%";}, 3000);
+            
+            document.getElementById("chatInput").blur();
         }
       </script>
     </body>

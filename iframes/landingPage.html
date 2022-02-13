@@ -1,23 +1,147 @@
 <html>
   <head>
+    <style>
+    body {
+        background-image: url('bg.png');
+         background-repeat: no-repeat;
+        background-size: 100% 100%;
+        overflow: hidden;
+    }
+    #titleImg {
+        /* I dont wanna mess with your code but img changes every img */
+        
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 793;
+        height: 223;
+    }  
+    
+    #theBigContainer{
+        position: absolute;
+        
+        top: 35%;
+        left: 50%;
+        transform: translate(-50%);
+    }
+    #nameContainer{
+        margin-left: 50%;
+        margin-bottom: 10px;
+        transform: translate(-50%);
+    }
+    #tankSelectionContainer{
+        
+        
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 5px;
+        flex-direction: row;
+        
+        
+    }
+    .imgContainer{
+        flex: 1 1 20%;
+        background-color: grey;
+        width: 55px;
+        
+        border: 2px solid black;
+        
+        transition: background-color 0.5s, border 0.5s;
+    }
+    .imgContainer:hover{
+        background-color: #aa0000;
+        border: 2px solid #df0000;
+        cursor: pointer;
+    }
+    .selected{
+        background-color: green;
+        border: 2px solid #00df00;
+    }
+    .imgContainer img{
+        width: 80%;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        
+        margin-left: 50%;
+        transform: translate(-50%);
+    }
+    #playButton{
+        
+        margin-top: 10px;
+        margin-left: 50%;
+        transform: translate(-50%);
+        background-color: transparent;
+        border: none;
+        font-size: 80px;
+    }
+    #playButton:hover{
+        cursor:pointer;
+    }
+         
+         
+    </style>
   </head>
   
   <body>
-    <div>TANKZ</div>
-    <div>Username: </div><input type="text" id="nameText">
-    <button onclick="startGame();">Enter</button>
+      
+    <img src="title.png" id="titleImg">
+    
+    <div id="theBigContainer">
+        <div id="nameContainer">Name: <input type="text" id="nameText" ></div>
+        <div id="tankSelectionContainer">
+            <div class="imgContainer selected" onclick="selectTank(1);"><img src="../images/tank-1.png"></div>
+            <div class="imgContainer" onclick="selectTank(2);"><img src="../images/tank-2.png"></div>
+            <div class="imgContainer" onclick="selectTank(3);"><img src="../images/tank-3.png"></div>
+            <div class="imgContainer" onclick="selectTank(4);"><img src="../images/tank-4.png"></div>
+            <div class="imgContainer" onclick="selectTank(5);"><img src="../images/tank-5.png"></div>
+            <div class="imgContainer" onclick="selectTank(6);"><img src="../images/tank-6.png"></div>
+            <div class="imgContainer" onclick="selectTank(7);"><img src="../images/tank-7.png"></div>
+            <div class="imgContainer" onclick="selectTank(8);"><img src="../images/tank-8.png"></div>
+        </div>
+        <button id="playButton" onclick="startGame();">Play</button>
+    </div>
+    
+    
+    
     
     <script>
+        /* Tank selection stuff */
+        var selectedTank = 1;
+        function selectTank(elem){
+            tankElems = document.getElementsByClassName("imgContainer");
+            for(let i = 0; i < tankElems.length; i++){
+                if(i == elem - 1){
+                    tankElems[i].className = "imgContainer selected"
+                }
+                else{
+                    tankElems[i].className = "imgContainer"
+                }
+            }
+            selectedTank = elem;
+        }
       
-      function startGame(){
-      	if(document.getElementById("nameText").value == ""){
-      		parent.playerInfo.name = "Guest-"+Math.floor(Math.random()*100);
-      	}
-      	else{
-      		parent.playerInfo.name = document.getElementById("nameText").value;
-      	}
-      	window.location.href = "joinGame.html";
-      }
+        function startGame(){
+            let name = "";
+            if(document.getElementById("nameText").value == ""){
+              name = "Guest-"+Math.floor(Math.random()*100);
+            }
+            else{
+              name = document.getElementById("nameText").value;
+            }
+            
+            const payload = {
+              "method": "sendInfo",
+              "clientId": parent.clientId,
+        	  "name": name,
+        	  "tank": selectedTank
+            }
+            parent.ws.send(JSON.stringify(payload));
+            
+            window.location.href = "joinGame.html";
+        }
     </script>
+    
+    
   </body>
 </html>

@@ -18,7 +18,7 @@
   
   <body>
     
-    <iframe id="gameFrame" src="/tankz/iframes/landingPage.html"></iframe>
+    <iframe id="gameFrame" src="/iframes/landingPage.html"></iframe>
     	
     <script>
       /* Global vars */
@@ -31,7 +31,7 @@
       var iframe = document.getElementById("gameFrame");
       
       /* Websocket stuff */
-      ws = new WebSocket("ws://45.61.185.184:8000");
+      ws = new WebSocket("ws://tankz.xyz:8000");
       ws.onmessage = message => {
       	//message.data is the string
       	const response = JSON.parse(message.data);
@@ -46,23 +46,23 @@
       		gameId = response.game.gameId;
       		console.log("Game created with ID " + gameId);
       
-      		iframe.contentWindow.redirect("/tankz/iframes/lobby.html");
+      		iframe.contentWindow.redirect("/iframes/lobby.html");
       	}
       	//join method
       	if(response.method === "join"){
       		if(response.error != null){
-      			iframe.contentWindow.redirect("/tankz/iframes/joinGame.html");
+      			iframe.contentWindow.redirect("/iframes/joinGame.html");
       		}
       		else{
               const gameInfo = response.gameInfo;
 
               iframe.contentWindow.clearPlayers();
               playerInfo.color = response.color;
-              if(playerInfo.color == "red"){
+              if(playerInfo.color == "0"){
                   iframe.contentWindow.showPlayButton();
               }
               gameInfo.players.forEach (c => {
-                  iframe.contentWindow.addPlayer(c.name);
+                  iframe.contentWindow.addPlayer(c.name, c.color, c.sprite);
               })
       		}
       	}
@@ -80,6 +80,12 @@
       			iframe.contentWindow.updateGameState(response);
       		}
       	} 
+      	//newchat method
+      	if(response.method === "newChat"){
+      	    if (typeof iframe.contentWindow.updateChat !== "undefined"){
+      			iframe.contentWindow.updateChat(response.username, response.message, response.color);
+      		}
+      	}
       }
     </script>
   </body>

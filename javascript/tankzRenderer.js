@@ -14,7 +14,13 @@ var walls = [];
 var score = [];
 var lastImgs = [];
 
+var offscreenCanvas = document.createElement('canvas');
+var offscreenCtx = offscreenCanvas.getContext('2d');
+var baseImg = new Image();
+baseImg.src = "../images/color_base.png";
+
 /*Main*/
+var iterator = 0;
 function draw(data){
     //console.log(data);
     
@@ -41,7 +47,7 @@ function draw(data){
       	ctx.clearRect(0, 0, canvas.width, canvas.height);
       	
       	//Background grey
-      	ctx.fillStyle = '#afafaf';
+      	ctx.fillStyle = '#bfbfbf';
       	ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "black";            //reset fill
       
@@ -69,10 +75,29 @@ function draw(data){
           ctx.rotate(degToRad(data.gameData.tanks[i].rotation));
           ctx.translate(-(data.gameData.tanks[i].x + tankWidth/2), -(data.gameData.tanks[i].y + tankHeight/2)); 	//translate back
           
-          //CHANGE COLOR TEST
-          //ctx.filter = "hue-rotate(90deg)";
-          ctx.drawImage(lastImgs[data.gameData.tanks[i].id], data.gameData.tanks[i].x, data.gameData.tanks[i].y, tankWidth, tankHeight);
-          //ctx.filter = "none";
+          //CHANGE COLOR CODE
+          //clear offscreen ctx
+          offscreenCtx.clearRect(0,0,offscreenCanvas.width, offscreenCanvas.height);
+          offscreenCtx.fillStyle = "#ff0000";
+          offscreenCtx.fillRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+          
+          //draw base img outline in whatever color
+          offscreenCtx.globalCompositeOperation = "destination-in";
+          offscreenCtx.drawImage(baseImg, 0,0, offscreenCanvas.width, offscreenCanvas.height);
+          
+          //reset mode
+          offscreenCtx.globalCompositeOperation = "source-over";
+          
+          //draw img
+          offscreenCtx.drawImage(lastImgs[data.gameData.tanks[i].id], 0,0, offscreenCanvas.width, offscreenCanvas.height);
+          
+          
+          
+          // draw modified img
+          ctx.drawImage(offscreenCanvas, data.gameData.tanks[i].x, data.gameData.tanks[i].y, tankWidth, tankHeight);
+    
+          //ctx.filter = "hue-rotate("+tanks[data.gameData.tanks[i].id].color+"deg)";
+          //ctx.drawImage(lastImgs[data.gameData.tanks[i].id], data.gameData.tanks[i].x, data.gameData.tanks[i].y, tankWidth, tankHeight);
           
           ctx.restore();
         
@@ -90,7 +115,8 @@ function draw(data){
           //update the scoreboard
           let scoreElem = document.createElement("span");
           scoreElem.className = "scoreElem";
-          scoreElem.style.color = score[i].color;
+          scoreElem.style.color = "green";
+          scoreElem.style.filter = "hue-rotate("+score[i].color+"deg)";
           scoreElem.textContent = score[i].points;
           scoreboardElem.appendChild(scoreElem);  
         }

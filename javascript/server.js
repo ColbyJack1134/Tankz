@@ -27,6 +27,9 @@ class Client{
   	setTank(tank){
      	this.tank = tank; 
     }
+    setSprite(sprite){
+        this.playerInfo.sprite = sprite;
+    }
 }
 class Game{
  	//VARS
@@ -57,9 +60,15 @@ class Game{
           
           //redo all the colors
           for(let i = 0; i < this.gameState.tanks.length; i++){
-             let color = {"0": "red", "1": "green", "2": "blue"}[i];
+             let color = 0;
+            if(i < 5){
+                color = i*72;
+            }
+            else{
+                color = ( i%5 * 72 ) - 36;
+            }
              this.gameState.tanks[i].setColor(color);
-           	 this.gameState.tanks[i].setSprite("../images/"+color+"tank.png");
+           	 this.gameState.tanks[i].setSprite(player.playerInfo.sprite);
           }
         }
     }
@@ -91,7 +100,7 @@ class Game{
           	tanks.push(new tankz.Tank());
           	tanks[i].setColor(this.players[i].playerInfo.color);
           	tanks[i].setName(this.players[i].playerInfo.name);
-          	tanks[i].setSprite("../images/"+this.players[i].playerInfo.color+"tank.png");
+          	tanks[i].setSprite(this.players[i].playerInfo.sprite);
           
           	this.players[i].setTank(tanks[i]);
         }

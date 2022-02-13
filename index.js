@@ -4,6 +4,7 @@
 */
 
 /* IMPORTS */
+
 const http = require("http");								//listener
 const app = require("express")();							//serves pages
 const websocketServer = require("websocket").server;		//websocket
@@ -11,10 +12,24 @@ const tankz = require("./javascript/tankz.js");				//tankz game library
 const server = require("./javascript/server.js");			//game and client classes
 
 /*HTTP STUFF*/
-app.get("/tankz", (req, res)=>res.sendFile(__dirname + "/index.html"));									//landing page
-app.get("/tankz/javascript/tankzRenderer.js", (req, res)=>res.sendFile(__dirname+"/javascript/tankzRenderer.js"));
-app.get("/tankz/images/*", (req, res)=>res.sendFile(__dirname + "/images/" + req.params[0]));			//img folder
-app.get("/tankz/iframes/*", (req, res)=>res.sendFile(__dirname + "/iframes/" + req.params[0]));			//iframes folder
+/* Redirect HTTPS to HTTP, doesn't totally work the first time idk why */
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV === 'production') {
+        if (req.headers['x-forwarded-proto'] !== 'http'){
+            // the instructions to perform redirection will be located here
+            return res.redirect('http://' + req.headers.host + req.url);
+        }
+        else{
+            // if https is already being used, we simply move on to the next phase in the app's logic cycle
+            return next(); 
+        }
+    } else
+        return next();
+});
+app.get("", (req, res)=>res.sendFile(__dirname + "/index.html"));									//landing page
+app.get("/javascript/tankzRenderer.js", (req, res)=>res.sendFile(__dirname+"/javascript/tankzRenderer.js"));
+app.get("/images/*", (req, res)=>res.sendFile(__dirname + "/images/" + req.params[0]));			//img folder
+app.get("/iframes/*", (req, res)=>res.sendFile(__dirname + "/iframes/" + req.params[0]));			//iframes folder
 app.listen("80", ()=>console.log("HTTP listeneing on port 80"));										//http server on port 8001
 
 const clients = {};			//all the clients
@@ -82,8 +97,17 @@ wsServer.on("request", request => {
     /*MESSAGE RECEIVED*/
     const result = JSON.parse(message.utf8Data);
     
+    //Playerinfo
+    if(result.method === "sendInfo"){
+        const clientId = result.clientId;
+        const name = result.name;
+        const tank = result.tank;
+        
+        clients[clientId].setName(name);
+        clients[clientId].setSprite("../images/tank-"+tank+".png");
+    }
     //CREATE
-    if(result.method === "create"){
+    else if(result.method === "create"){
      	//user wants to create a new game
       	const clientId = result.clientId;
       	const gameId = genRanCode(5);
@@ -104,12 +128,9 @@ wsServer.on("request", request => {
       	
       	const clientId = result.clientId;
       	const gameId = result.gameId;
-      	const name = result.name;
-      
-      	clients[clientId].setName(name);
       
       	let game = games[gameId];
-      	if(game == null || game.players.length >= 3){
+      	if(game == null || game.players.length >= 9){
           	//game no exist or too many players
           	let payload = {
          		"method": "join",
@@ -132,7 +153,14 @@ wsServer.on("request", request => {
             })
           	return;
         }
-      	const color = {"0": "red", "1": "green", "2": "blue"}[game.players.length];		//skuffed plz fix
+        
+        let color = 0;
+        if(game.players.length < 5){
+            color = game.players.length*72;
+        }
+        else{
+            color = ( game.players.length%5 * 72 ) - 36;
+        }
      	clients[clientId].setColor(color);
       
       	game.addPlayer(clients[clientId]);
@@ -209,6 +237,27 @@ wsServer.on("request", request => {
               	clients[clientId].tank.keys.down = false;	  
             }
         } 	
+    }
+    //CHAT SYSTEM WOOP
+    else if(result.method === "sendChat"){
+        const gameId = result.gameId;
+      	const clientId = result.clientId;
+      	const message = result.message;
+      	
+      	const game = games[gameId];
+      	const client = clients[clientId];
+      	
+      	game.players.forEach(c=> {
+      	    //send each player the new chat message
+      	    let payload = {
+      	        "method":"newChat",
+      	        "username":client.playerInfo.name,
+      	        "message":message,
+      	        "color":clients[clientId].tank.color
+      	    }
+      	    
+          	sendPayload(c, payload);
+        });
     }
   })
   
