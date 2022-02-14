@@ -32,7 +32,7 @@
       
       /* Websocket stuff */
       ws = new WebSocket("ws://tankz.xyz:8000");
-      ws.onmessage = message => {
+      ws.onmessage = async (message) => {
       	//message.data is the string
       	const response = JSON.parse(message.data);
       	
@@ -58,7 +58,8 @@
 
               iframe.contentWindow.clearPlayers();
               playerInfo.color = response.color;
-              if(playerInfo.color == "0"){
+              playerInfo.isHost = response.isHost;
+              if(playerInfo.isHost){
                   iframe.contentWindow.showPlayButton();
               }
               gameInfo.players.forEach (c => {

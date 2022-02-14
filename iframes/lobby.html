@@ -3,9 +3,27 @@
       <style>
         .playerContainer{
         	display: inline-block;
+        	position: relative;
+        	width: 200px;
+        	height: 300px;
+        }
+        .playerContainer img{
+            position: absolute;
+            left: 50%;
+            top: 48%;
+            transform: translate(-50%, -50%);
+        }
+        .playerContainer canvas{
+            position: absolute;
+            left: 50%;
+            top: 48%;
+            transform: translate(-50%, -50%);
         }
         .playerName{
+        	position: absolute;
         	text-align: center;
+        	bottom: 1%;
+        	width: 100%;
         }
       </style>
   	</head>
@@ -17,6 +35,10 @@
       <button onclick="startGame()" style="display: none" id="startButton">Start Game</button>
       
       <script> 
+        //color stuff
+        var baseImg = new Image();
+        baseImg.src = "../images/color-base.png";
+      
         /* Startup */
         if(parent.clientId === null || parent.gameId === null){
         	window.location.replace("/tankz/index.html");
@@ -42,13 +64,35 @@
         	}
         }
         function addPlayer(name, color, sprite){
+            if(!baseImg.complete){
+                setTimeout(function(){addPlayer(name, color, sprite)}, 100);
+                return;
+            }
             
         	let container = document.createElement("div");
         	container.className = "playerContainer";
         
-        	let player = document.createElement("img");
+            //color stuff again
+            let canvasElem = document.createElement('canvas');
+            canvasElem.width = baseImg.width;
+            canvasElem.height = baseImg.height;
+            
+            container.appendChild(canvasElem);
+            
+            let ctxElem = canvasElem.getContext('2d');
+            
+            ctxElem.clearRect(0,0,canvasElem.width, canvasElem.height);
+            ctxElem.fillStyle = "hsl("+color+", 100%, 50%)";
+            ctxElem.fillRect(0,0,canvasElem.width, canvasElem.height);
+            
+            ctxElem.globalCompositeOperation = "destination-in";
+            
+            ctxElem.drawImage(baseImg, 0,0, canvasElem.width, canvasElem.height);
+
+            let player = document.createElement("img");
         	player.src = sprite;
-        	player.style.filter = "hue-rotate("+color+"deg)";
+        	
+        	//player.style.filter = "hue-rotate("+color+"deg)";
         
         	if(color == parent.playerInfo.color){
         		container.style.border = "solid 3px green";

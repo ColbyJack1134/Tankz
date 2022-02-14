@@ -154,15 +154,12 @@ wsServer.on("request", request => {
           	return;
         }
         
-        let color = 0;
-        if(game.players.length < 5){
-            color = game.players.length*72;
+        if(game.players.length == 0){
+            clients[clientId].setHost(true);
         }
         else{
-            color = ( game.players.length%5 * 72 ) - 36;
+            clients[clientId].setHost(false);
         }
-     	clients[clientId].setColor(color);
-      
       	game.addPlayer(clients[clientId]);
       
       	let payload = {
@@ -173,6 +170,7 @@ wsServer.on("request", request => {
       	//loop through all clients to tell them ppl have joined
       	game.players.forEach(c=> {
           	payload["color"] = c.playerInfo.color;
+          	payload["isHost"] = c.playerInfo.isHost;
           	sendPayload(c, payload);
         })
     }
@@ -180,7 +178,7 @@ wsServer.on("request", request => {
     else if(result.method === "start"){
       	const gameId = result.gameId;
       	const clientId = result.clientId;
-      	if(games[gameId].players[0].clientId === clientId){
+      	if(clients[clientId].playerInfo.isHost){
           	activeGames[gameId] = games[gameId];
           	activeGames[gameId].startGame(new tankz.GameState());
           	logLobby(gameId, true, true);

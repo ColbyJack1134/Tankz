@@ -53,7 +53,7 @@ class GameState{
         this.newMap = true;
       }
       else if(this.gameState == "playing" || this.gameState == "finishing round"){
-        if(this.aliveTanks.length <= 1 && this.gameState != "finishing round"){
+        if(this.aliveTanks.length <= 1 && this.gameState != "finishing round" && this.aliveTanks.length != this.tanks.length){
           this.gameState = "finishing round";
           var that = this;
           setTimeout(function(){that.gameState = "calculate points";}, 3000);

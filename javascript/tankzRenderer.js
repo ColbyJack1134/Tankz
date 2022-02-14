@@ -12,12 +12,12 @@ var bulletRadius = 5;
 var tanks = [];
 var walls = [];
 var score = [];
-var lastImgs = [];
+var tanksRender = [];
 
 var offscreenCanvas = document.createElement('canvas');
 var offscreenCtx = offscreenCanvas.getContext('2d');
 var baseImg = new Image();
-baseImg.src = "../images/color_base.png";
+baseImg.src = "../images/color-base.png";
 
 /*Main*/
 var iterator = 0;
@@ -27,16 +27,46 @@ function draw(data){
     //update vars if a new map
     if(data.newMap){
         walls = data.mapData.walls;             //wall positions
-        score = data.mapData.score;             //score data
+
+        //update tanks render so you dont have to render them every 10ms 
+        for(let i = 0; i < data.mapData.tanks.length; i++){
+            if(!tanksRender[i] || tanks[i].sprite != data.mapData.tanks[i].sprite || tanks[i].color != data.mapData.tanks[i].color){
+                //render the tank in its own canvas
+                let tankCanvas = document.createElement('canvas');
+                let tankCtx = tankCanvas.getContext('2d');
+                
+                tankCtx.fillStyle = "hsl("+data.mapData.tanks[i].color+", 100%, 50%)";
+                tankCtx.fillRect(0, 0, tankCanvas.width, tankCanvas.height);
+                
+                //draw base img outline in whatever color
+                tankCtx.globalCompositeOperation = "destination-in";
+                tankCtx.drawImage(baseImg, 0,0, tankCanvas.width, tankCanvas.height);
+                  
+                //reset mode
+                tankCtx.globalCompositeOperation = "source-over";
+                  
+                //draw img (once img loads)
+                let tankImg = new Image();
+                tankImg.src = data.mapData.tanks[i].sprite;
+                tanksRender[i] = tankCanvas;
+                tankImg.onload = function(){tankCtx.drawImage(tankImg, 0,0, tankCanvas.width, tankCanvas.height);}
+            }
+        }
         tanks = data.mapData.tanks;             //tank sprite, color, name
         
-        //update images
-        for(let i = 0; i < tanks.length; i++){
-            if(!lastImgs[i] || lastImgs[i].src != tanks[i].sprite){
-                let img = new Image();
-                img.src = tanks[i].sprite;
-                lastImgs[i] = img;
-            }
+        //SCOREBOARD
+        score = data.mapData.score;             //score data
+        let scoreboardElem = document.getElementById("scoreboard");
+      	while(scoreboardElem.lastChild){
+          scoreboardElem.removeChild(scoreboardElem.lastChild);
+        } 
+        for(let i = 0; i < score.length; i++){
+            //update the scoreboard
+            let scoreElem = document.createElement("span");
+            scoreElem.className = "scoreElem";
+            scoreElem.style.color = "hsl("+score[i].color+", 100%, 50%)";
+            scoreElem.textContent = score[i].points;
+            scoreboardElem.appendChild(scoreElem);  
         }
     }
     else if(tanks.length > 0){
@@ -75,26 +105,8 @@ function draw(data){
           ctx.rotate(degToRad(data.gameData.tanks[i].rotation));
           ctx.translate(-(data.gameData.tanks[i].x + tankWidth/2), -(data.gameData.tanks[i].y + tankHeight/2)); 	//translate back
           
-          //CHANGE COLOR CODE
-          //clear offscreen ctx
-          offscreenCtx.clearRect(0,0,offscreenCanvas.width, offscreenCanvas.height);
-          offscreenCtx.fillStyle = "#ff0000";
-          offscreenCtx.fillRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-          
-          //draw base img outline in whatever color
-          offscreenCtx.globalCompositeOperation = "destination-in";
-          offscreenCtx.drawImage(baseImg, 0,0, offscreenCanvas.width, offscreenCanvas.height);
-          
-          //reset mode
-          offscreenCtx.globalCompositeOperation = "source-over";
-          
-          //draw img
-          offscreenCtx.drawImage(lastImgs[data.gameData.tanks[i].id], 0,0, offscreenCanvas.width, offscreenCanvas.height);
-          
-          
-          
-          // draw modified img
-          ctx.drawImage(offscreenCanvas, data.gameData.tanks[i].x, data.gameData.tanks[i].y, tankWidth, tankHeight);
+          // draw takk render
+          ctx.drawImage(tanksRender[data.gameData.tanks[i].id], data.gameData.tanks[i].x, data.gameData.tanks[i].y, tankWidth, tankHeight);
     
           //ctx.filter = "hue-rotate("+tanks[data.gameData.tanks[i].id].color+"deg)";
           //ctx.drawImage(lastImgs[data.gameData.tanks[i].id], data.gameData.tanks[i].x, data.gameData.tanks[i].y, tankWidth, tankHeight);
@@ -104,21 +116,6 @@ function draw(data){
           //draw name
           ctx.textAlign = "center";
           ctx.fillText(tanks[data.gameData.tanks[i].id].name, data.gameData.tanks[i].x + tankWidth/2, data.gameData.tanks[i].y - 10);
-        }
-      
-      	//SCOREBOARD
-      	let scoreboardElem = document.getElementById("scoreboard");
-      	while(scoreboardElem.lastChild){
-          scoreboardElem.removeChild(scoreboardElem.lastChild);
-        } 	
-      	for(let i = 0; i < score.length; i++){
-          //update the scoreboard
-          let scoreElem = document.createElement("span");
-          scoreElem.className = "scoreElem";
-          scoreElem.style.color = "green";
-          scoreElem.style.filter = "hue-rotate("+score[i].color+"deg)";
-          scoreElem.textContent = score[i].points;
-          scoreboardElem.appendChild(scoreElem);  
         }
     }
 }

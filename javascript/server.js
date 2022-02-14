@@ -30,6 +30,9 @@ class Client{
     setSprite(sprite){
         this.playerInfo.sprite = sprite;
     }
+    setHost(val){
+        this.playerInfo.isHost = val;
+    }
 }
 class Game{
  	//VARS
@@ -39,17 +42,28 @@ class Game{
   
   	players = [];
   	gameInfo = {};
+  	
+  	colors;
+  	availableColors;
 
 	//METHODS
 	constructor(gameId){
     	this.gameId = gameId;  
       	this.gameInfo.gameId = gameId;
       	this.gameInfo.players = [];
+      	
+      	this.colors = [0, 231, 128, 282, 51, 25, 180, 304, 28];
+      	this.availableColors = [0, 231, 128, 282, 51, 25, 180, 304, 28];
     }
   	addPlayer(player){
       	this.players.push(player);
       	this.gameInfo.players.push(player.playerInfo);
       	player.setGame(this);
+      	
+      	let colorPicked = Math.floor(Math.random()*this.availableColors.length);
+      	player.setColor(this.availableColors[colorPicked]);
+      	this.availableColors.splice(colorPicked, 1);
+      	
       	if(this.isActive){
           //Add tank to active game (kinda skuffed rn)
           this.gameState.tanks.push(new tankz.Tank());
@@ -57,9 +71,11 @@ class Game{
           
           //set name
           player.tank.setName(player.playerInfo.name);
+          player.tank.setColor(player.playerInfo.color);
+   	      player.tank.setSprite(player.playerInfo.sprite);
           
           //redo all the colors
-          for(let i = 0; i < this.gameState.tanks.length; i++){
+          /*for(let i = 0; i < this.gameState.tanks.length; i++){
              let color = 0;
             if(i < 5){
                 color = i*72;
@@ -69,13 +85,14 @@ class Game{
             }
              this.gameState.tanks[i].setColor(color);
            	 this.gameState.tanks[i].setSprite(player.playerInfo.sprite);
-          }
+          }*/
         }
     }
   	removePlayer(player){
         let index = this.players.indexOf(player);
         if (index > -1) {
           this.players.splice(index, 1); // 2nd parameter means remove one item only
+          this.availableColors.push(player.playerInfo.color);
         }
       
       	if(this.isActive){

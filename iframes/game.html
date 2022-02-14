@@ -34,8 +34,9 @@
           	.scoreElem{
           		margin-left: 5px;
           		margin-right: 5px;
-          		font-size: 25px;
+          		font-size: 30px;
           		font-weight: bold;
+          		-webkit-text-stroke: 1.5px black;
           	}
           	#chatArea{
           	    position: absolute;
@@ -177,8 +178,7 @@
             let messageElem = document.getElementById("messages");
             
             let name = document.createElement("span");
-            name.style.color = "green";
-            name.style.filter = "hue-rotate("+color+"deg)";
+            name.style.color = "hsl("+color+", 100%, 30%)";
             name.textContent = "\n"+username;
             
             let messageE = document.createElement("span");
