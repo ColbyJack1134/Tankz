@@ -1,13 +1,59 @@
 <html>
   <head>
+      <style>
+          body {
+        background-image: url('bg.png');
+         background-repeat: no-repeat;
+        background-size: 100% 100%;
+        overflow: hidden;
+    }
+    #titleImg {
+        /* I dont wanna mess with your code but img changes every img */
+        
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 793;
+        height: 223;
+    }  
+     #settingsButton
+    {
+        background-color: transparent;
+        height = 10px ;
+        width= 10px ;
+
+        margin-left: 94%;
+        margin-top: 23%;
+         border: none;
+     
+    }
+    #aboutButton
+    {
+        background-color: transparent;
+        height = 10px ;
+        width= 10px ;
+        margin-left: 94%;
+        margin-top: 0.5%;
+         border: none;
+     
+    }
+    #settingsButton:hover{
+        cursor:pointer;
+    }
+    #aboutButton:hover{
+        cursor:pointer;
+    }
+      </style>
   </head>
   
   <body>
-    
-    <h1>TANKZ</h1>
+    <img src="title.png" id="titleImg">
     <button id="newGame" onclick="startGame();">New Lobby</button>
     <br>
     <button id="joinGame" onclick="joinGame();">Join Lobby: </button><input type="text" id="joinGameText">
+    
+    <button type="button" id = "settingsButton"> <img src="settings.png" height = "50" /></button>
+    <button type="button" id = "aboutButton"> <img src="about.png"  height = "50" /></button>
 
     <script>    
       

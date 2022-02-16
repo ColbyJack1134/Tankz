@@ -195,10 +195,10 @@ class GameState{
 
 /* Le Tank and bullet code (probably skuffed cuz old)*/
 class Tank{
-  width = 50;
-  height = 78.33;
+  width = 172/3.5;
+  height = 274/3.5;
   bulletArr = [];
-  isAlive = true;
+  isAlive = false;
   points = 0;
   color = "";
   name = "";

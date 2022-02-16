@@ -43,7 +43,6 @@ class Game{
   	players = [];
   	gameInfo = {};
   	
-  	colors;
   	availableColors;
 
 	//METHODS
@@ -52,7 +51,6 @@ class Game{
       	this.gameInfo.gameId = gameId;
       	this.gameInfo.players = [];
       	
-      	this.colors = [0, 231, 128, 282, 51, 25, 180, 304, 28];
       	this.availableColors = [0, 231, 128, 282, 51, 25, 180, 304, 28];
     }
   	addPlayer(player){

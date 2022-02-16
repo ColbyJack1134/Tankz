@@ -5,6 +5,9 @@
 
 /* IMPORTS */
 
+//log existance
+console.log("\n"+getDateTime() + "\nProcess started");
+
 const http = require("http");								//listener
 const app = require("express")();							//serves pages
 const websocketServer = require("websocket").server;		//websocket
@@ -276,7 +279,12 @@ wsServer.on("request", request => {
 
 /* FUNCTIONS */
 function sendPayload(client, payload){
-  client.connection.send(JSON.stringify(payload));
+  try{
+      client.connection.send(JSON.stringify(payload));
+  }
+  catch{
+      return;
+  }
 }
 //Loop that basically updates each game and sends clients game info
 function updateActiveGames(){
@@ -311,16 +319,16 @@ function updateActiveGames(){
 
 //Logging
 function logUser(clientId, connected){
-  let createdStr = " Connected"
+  let createdStr = " Connected from " + getIp(clientId);
   if(!connected){
     createdStr = " Disconnected"
   }
-  console.log("\n");
+  console.log("\n"+getDateTime());
   console.log("Client " + clientId + createdStr);
   console.log("Total Clients: " + Object.keys(clients).length);
 }
 function logLobby(gameId, created, isActive){
-  console.log("\n");
+  console.log("\n"+getDateTime());
   if(isActive){
     let createdStr = " Started";
     if(!created){
@@ -336,6 +344,29 @@ function logLobby(gameId, created, isActive){
     console.log("Lobby " + gameId + createdStr);
   }
   console.log("Lobbies: " + Object.keys(games).length + "     Active Lobbies: " + Object.keys(activeGames).length);
+}
+function getDateTime(){
+    //returns date and time string for logging
+    let date_ob = new Date();
+
+    let day = ("0" + date_ob.getDate()).slice(-2);
+    let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+    let year = date_ob.getFullYear();
+    
+    // current hours
+    let hours = ("0"+(date_ob.getHours() + 3)%24).slice(-2);                    //skuffed time zone adjustment
+    let minutes = ("0"+date_ob.getMinutes()).slice(-2);
+    let seconds = ("0"+date_ob.getSeconds()).slice(-2);
+    
+    return year + "-" + month + "-" + day + "  " + hours + ":" + minutes + ":" + seconds;
+}
+function getIp(clientId){
+    try{
+        return clients[clientId].connection.remoteAddress;
+    }
+    catch{
+        return "Error";
+    }
 }
 
 /* Game code stuff */

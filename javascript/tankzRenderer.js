@@ -5,8 +5,8 @@ var container = null;
 var canvas = null;
 var ctx = null;
 
-var tankWidth = 50;
-var tankHeight = 78.33;
+var tankWidth = 172/3.5;
+var tankHeight = 274/3.5;
 var bulletRadius = 5;
 
 var tanks = [];
@@ -26,11 +26,12 @@ function draw(data){
     
     //update vars if a new map
     if(data.newMap){
+        console.log(data);
         walls = data.mapData.walls;             //wall positions
 
         //update tanks render so you dont have to render them every 10ms 
         for(let i = 0; i < data.mapData.tanks.length; i++){
-            if(!tanksRender[i] || tanks[i].sprite != data.mapData.tanks[i].sprite || tanks[i].color != data.mapData.tanks[i].color){
+            if(!tanks[i] || !tanksRender[i] || tanks[i].sprite != data.mapData.tanks[i].sprite || tanks[i].color != data.mapData.tanks[i].color){
                 //render the tank in its own canvas
                 let tankCanvas = document.createElement('canvas');
                 let tankCtx = tankCanvas.getContext('2d');
@@ -77,7 +78,7 @@ function draw(data){
       	ctx.clearRect(0, 0, canvas.width, canvas.height);
       	
       	//Background grey
-      	ctx.fillStyle = '#bfbfbf';
+      	ctx.fillStyle = '#e6e6e6';
       	ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "black";            //reset fill
       
@@ -114,6 +115,7 @@ function draw(data){
           ctx.restore();
         
           //draw name
+          ctx.font = "12px Arial";
           ctx.textAlign = "center";
           ctx.fillText(tanks[data.gameData.tanks[i].id].name, data.gameData.tanks[i].x + tankWidth/2, data.gameData.tanks[i].y - 10);
         }
