@@ -1,7 +1,4 @@
 /* HANDLES ALL THE SERVER SIDE STUFF: html, websockets, etc */
-/* TODOS
-*	Color stuff is skuffed rn, would be nice to have a custom color / also sprite
-*/
 
 /* IMPORTS */
 
